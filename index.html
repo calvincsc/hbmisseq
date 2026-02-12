@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Alison 生日神戶之旅 🎂 (7-10/3)</title>
+    <style>
+        :root {
+            --primary: #8d6e63;      /* Brown */
+            --accent: #ffb74d;       /* Golden Yellow */
+            --bg-color: #fffde7;     /* Light Yellow BG */
+            --card-bg: #ffffff;
+            --active-tab-bg: #ffb74d;
+            --active-tab-text: #ffffff;
+            --inactive-tab-bg: #fff59d;
+            --inactive-tab-text: #8d6e63;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: #5d4037;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px;
+            -webkit-tap-highlight-color: transparent;
+            height: 100vh;
+        }
+
+        /* Login Screen Styles */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .login-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(141, 110, 99, 0.15);
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            border: 2px solid var(--accent);
+        }
+        .login-title {
+            font-size: 1.2rem;
+            color: #6d4c41;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .login-input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+        }
+        .login-input:focus {
+            border-color: var(--accent);
+        }
+        .login-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .login-btn:active {
+            transform: scale(0.95);
+        }
+        .error-msg {
+            color: #e57373;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Main Content (Hidden initially) */
+        #main-app {
+            display: none;
+        }
+
+        /* Header */
+        header {
+            background: #fff;
+            padding-top: 20px;
+            padding-bottom: 10px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(141, 110, 99, 0.05);
+        }
+        h1 { margin: 0; font-size: 1.3rem; color: #6d4c41; letter-spacing: 0.5px; }
+        h2 { margin: 5px 0 15px; font-size: 0.85rem; color: #8d6e63; font-weight: normal; }
+
+        /* Flight Buttons */
+        .flight-nav {
+            display: flex;
+            gap: 10px;
+            padding: 0 15px 15px;
+            justify-content: center;
+        }
+        .flight-btn {
+            background: #fff;
+            border: 1px solid var(--accent);
+            color: #6d4c41;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+        }
+
+        /* Scrollable Tabs - Pill Style */
+        .tab-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+            padding-bottom: 5px; /* Space for shadow if needed */
+        }
+        .tab-scroll-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+        .tab-container {
+            display: flex;
+            padding: 0 15px;
+            gap: 10px;
+            white-space: nowrap;
+            width: max-content; /* Ensure container grows with content */
+        }
+
+        .tab-btn {
+            background: var(--inactive-tab-bg);
+            color: var(--inactive-tab-text);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .tab-btn.active {
+            background: var(--active-tab-bg);
+            color: var(--active-tab-text);
+            box-shadow: 0 2px 5px rgba(255, 183, 77, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* Content */
+        .content-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 15px;
+            min-height: 60vh;
+        }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Simplified Checklist */
+        .category-title {
+            color: #e65100;
+            font-size: 0.95rem;
+            margin: 20px 0 8px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .category-title::before { content: '◈'; margin-right: 8px; color: var(--accent); }
+
+        .checklist-group {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+        .checklist-item {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95rem;
+        }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-item input { margin-right: 15px; accent-color: var(--accent); transform: scale(1.2); }
+        .checklist-item span { color: #5d4037; }
+
+        /* Timeline */
+        .day-summary {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--accent);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .timeline { padding-left: 10px; }
+        .event {
+            position: relative;
+            padding: 0 0 30px 25px;
+            border-left: 2px dashed #d7ccc8;
+        }
+        .event:last-child { border-left: 2px solid transparent; }
+        .event::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--primary);
+        }
+        .event.highlight::before {
+            background: var(--accent);
+            border-color: var(--accent);
+            width: 14px;
+            height: 14px;
+            left: -8px;
+        }
+
+        .time-badge {
+            display: inline-block;
+            background: #efebe9;
+            color: #5d4037;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+        .event-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 5px; color: #3e2723; }
+        .event-desc { font-size: 0.9rem; color: #6d4c41; margin-bottom: 8px; }
+
+        .detail-box {
+            background: #f9fbe7;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            border: 1px solid #e6ee9c;
+            color: #558b2f;
+        }
+        .loc-box { background: #fff3e0; border-color: #ffe0b2; color: #e65100; }
+        .transport-box { background: #e1f5fe; border-color: #b3e5fc; color: #0277bd; }
+
+        /* Flex Note */
+        .flex-note {
+            background: #e8eaf6;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0 25px;
+            font-size: 0.9rem;
+            color: #3f51b5;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .flex-note span { font-size: 1.2rem; }
+
+        .fab {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--accent);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-decoration: none;
+            font-size: 24px;
+            z-index: 200;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+    <div class="login-card">
+        <div style="font-size: 3rem; margin-bottom: 10px;">🍮</div>
+        <div class="login-title">請輸入密碼解鎖</div>
+        <input type="password" id="password-input" class="login-input" placeholder="密碼 (4-digit)" onkeypress="handleEnter(event)">
+        <br>
+        <button class="login-btn" onclick="checkPassword()">進入</button>
+        <div id="error-msg" class="error-msg">密碼錯誤，請再試一次</div>
+    </div>
+</div>
+
+<!-- MAIN APP CONTENT -->
+<div id="main-app">
+    <header>
+        <h1>Alison 生日神戶之旅 🎂</h1>
+        <h2>2026年 3月7日 (六) - 3月10日 (二)</h2>
+
+        <div class="flight-nav">
+            <a href="https://mybooking.hkexpress.com/zh-HK/manage-my-booking/my-trips" class="flight-btn" target="_blank">
+                ✈️ Chung (EBF9MA)
+            </a>
+            <a href="https://mybooking.hkexpress.com/zh-HK/manage-my-booking/my-trips" class="flight-btn" target="_blank">
+                ✈️ Alison (RDTHMK)
+            </a>
+        </div>
+
+        <!-- Scrollable Tabs -->
+        <div class="tab-scroll-wrapper">
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="openTab('prep', this)">出發準備</button>
+                <button class="tab-btn" onclick="openTab('day1', this)">Day 1 (3/7)</button>
+                <button class="tab-btn" onclick="openTab('day2', this)">Day 2 (3/8)</button>
+                <button class="tab-btn" onclick="openTab('day3', this)">Day 3 (3/9)</button>
+                <button class="tab-btn" onclick="openTab('day4', this)">Day 4 (3/10)</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="content-container">
+
+        <!-- Image Injection Placeholder -->
+        <div style="max-width:800px;margin:0 auto 15px auto;text-align:center;">
+            <img src="trip.jpeg" alt="trip" style="width:100%;height:auto;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,0.15);"/>
+        </div>
+
+        <!-- PREPARATION TAB (Simplified) -->
+        <div id="prep" class="tab-content active">
+            <div class="day-summary">
+                📋 <strong>出發前檢查清單</strong><br>
+                天氣預報：3月神戶平均氣溫 5°C - 13°C，早晚溫差大。
+            </div>
+
+            <div class="category-title">重要證件 & 金錢</div>
+            <div class="checklist-group">
+                <label class="checklist-item"><input type="checkbox"> <span>Passport</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>國際駕駛執照</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>實體提款卡</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>實體信用卡</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>日圓現金</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>Visit Japan</span></label>
+            </div>
+
+            <div class="category-title">電子 & 網絡</div>
+            <div class="checklist-group">
+                <label class="checklist-item"><input type="checkbox"> <span>外遊轉插</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>充電線 & powerbank</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>網上 Check-in</span></label>
+            </div>
+
+            <div class="category-title">衣物 & 天氣應對</div>
+            <div class="checklist-group">
+                <label class="checklist-item"><input type="checkbox"> <span>保暖內衣</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>防風外套</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>舒適步行的鞋</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>縮骨遮</span></label>
+            </div>
+
+            <div class="category-title">個人護理</div>
+            <div class="checklist-group">
+                <label class="checklist-item"><input type="checkbox"> <span>個人藥物</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>洗面護膚</span></label>
+                <label class="checklist-item"><input type="checkbox"> <span>化妝set頭</span></label>
+            </div>
+        </div>
+
+        <!-- DAY 1 TAB -->
+        <div id="day1" class="tab-content">
+            <div class="day-summary">
+                🛬 <strong>Day 1: 抵達神戶</strong><br>
+                重點：順利入境，搭巴士直達酒店，食個靚宵夜。
+            </div>
+
+            <div class="timeline">
+                <div class="event highlight">
+                    <div class="time-badge">20:35</div>
+                    <div class="event-title">抵達關西機場 (KIX)</div>
+                    <div class="event-desc">航班 UO862 • T1 到達 • 入境手續約 45-60 分鐘</div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">21:35</div>
+                    <div class="event-title">搭乘機場巴士</div>
+                    <div class="detail-box transport-box">
+                        🚌 上車：T1 1樓 6號巴士站<br>
+                        💴 費用：¥2,200<br>
+                        ⏱ 車程：約 65 分鐘 (直達三宮)
+                    </div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">22:50</div>
+                    <div class="event-title">Check-in 酒店</div>
+                    <div class="detail-box loc-box">
+                        📍 <strong>Sotetsu Fresa Inn Kobe Sannomiya</strong><br>
+                        巴士下車後步行 3-5 分鐘即達
+                    </div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">23:10</div>
+                    <div class="event-title">宵夜：Ramen Taro</div>
+                    <div class="event-desc">神戶在地拉麵，泡菜任食。</div>
+                    <div class="detail-box loc-box">
+                        📍 三宮本店 (步行 8 分鐘)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DAY 2 TAB -->
+        <div id="day2" class="tab-content">
+            <div class="day-summary">
+                🏯 <strong>Day 2: 歷史與異國風情</strong><br>
+                重點：姬路城世界遺產，下午市區漫步。
+            </div>
+
+            <div class="timeline">
+                <div class="event">
+                    <div class="time-badge">08:00</div>
+                    <div class="event-title">出發往姬路</div>
+                    <div class="detail-box transport-box">
+                        🚆 JR 神戶線 (新快速) • 往姬路方向
+                    </div>
+                </div>
+
+                <div class="event highlight">
+                    <div class="time-badge">09:00</div>
+                    <div class="event-title">姬路城 & 好古園</div>
+                    <div class="event-desc">必買共通券 (¥1,050)。</div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">12:30</div>
+                    <div class="event-title">午餐：姬路關東煮</div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">13:30</div>
+                    <div class="event-title">返回三宮</div>
+                    <div class="event-desc">JR 新快速返回三宮站。</div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">14:30</div>
+                    <div class="event-title">下午茶：Nishimura Coffee</div>
+                    <div class="detail-box loc-box">
+                        ☕️ <strong>北野坂店</strong> (必點冰咖啡)
+                    </div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">15:30</div>
+                    <div class="event-title">北野異人館街</div>
+                    <div class="event-desc">星巴克北野店(外觀) → 風見雞之館。</div>
+                </div>
+
+                <div class="flex-note">
+                    <span>💡</span>
+                    <div>
+                        <strong>行程調整小貼士</strong><br>
+                        如果太累，可跳過北野異人館，改去 Day 4 上午。
+                    </div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">18:30</div>
+                    <div class="event-title">晚餐：Grill Ippei</div>
+                    <div class="event-desc">必食炸牛排 (Beef Cutlet)。</div>
+                </div>
+
+                <div class="event highlight">
+                    <div class="time-badge">20:00</div>
+                    <div class="event-title">神戶港 MOSAIC 夜景</div>
+                    <div class="event-desc">飯後散步，欣賞神戶塔夜燈。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DAY 3 TAB -->
+        <div id="day3" class="tab-content">
+            <div class="day-summary">
+                🚗 <strong>Day 3: 自駕 Shopping & 溫泉</strong><br>
+                重點：提早取車去 Outlet，下午有馬溫泉。
+            </div>
+
+            <div class="timeline">
+                <div class="event">
+                    <div class="time-badge">08:15</div>
+                    <div class="event-title">取車：Budget Rent a Car</div>
+                    <div class="detail-box loc-box">
+                        📍 三宮站前店 (08:45 出發)
+                    </div>
+                </div>
+
+                <div class="event highlight">
+                    <div class="time-badge">09:30</div>
+                    <div class="event-title">Kobe-Sanda Premium Outlets</div>
+                    <div class="event-desc">西日本最大 Outlet，停留約 5 小時。</div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">14:30</div>
+                    <div class="event-title">前往有馬溫泉</div>
+                    <div class="event-desc">車程約 25 分鐘。</div>
+                </div>
+
+                <div class="event highlight">
+                    <div class="time-badge">15:00</div>
+                    <div class="event-title">Check-in 有馬きらり</div>
+                    <div class="detail-box loc-box">
+                        ♨️ 住客免費泊車，無限次使用太閣之湯。
+                    </div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">15:30</div>
+                    <div class="event-title">溫泉街散策 & 浸湯</div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">18:30</div>
+                    <div class="event-title">生日晚餐：旅館會席料理 🎂</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DAY 4 TAB -->
+        <div id="day4" class="tab-content">
+            <div class="day-summary">
+                🥩 <strong>Day 4: 神戶牛 & 回程</strong><br>
+                重點：還車，神戶牛 Lunch，元町掃貨。
+            </div>
+
+            <div class="timeline">
+                <div class="event">
+                    <div class="time-badge">10:00</div>
+                    <div class="event-title">還車 & 寄存行李</div>
+                    <div class="event-desc">三宮 Budget 還車 (入滿油)。</div>
+                </div>
+
+                <div class="flex-note">
+                    <span>🗓</span>
+                    <div>
+                        <strong>行程選項</strong><br>
+                        如 Day 2 沒去異人館，現在可去逛逛。
+                    </div>
+                </div>
+
+                <div class="event highlight">
+                    <div class="time-badge">11:00</div>
+                    <div class="event-title">早午餐：Steak Land Kobe</div>
+                    <div class="detail-box loc-box">
+                        🥩 <strong>攻略：</strong> 10:45 排隊，必搶午市套餐。
+                    </div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">13:00</div>
+                    <div class="event-title">元町商店街 & 最後掃貨</div>
+                    <div class="event-desc">觀音屋芝士蛋糕、神戶風月堂。</div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">16:00</div>
+                    <div class="event-title">前往神戶機場</div>
+                    <div class="event-desc">搭 Port Liner (約18分)。</div>
+                </div>
+
+                <div class="event highlight">
+                    <div class="time-badge">17:15</div>
+                    <div class="event-title">Bay Shuttle 高速船</div>
+                    <div class="detail-box transport-box">
+                        🚢 船程 30 分鐘直達 KIX (¥500)。
+                    </div>
+                </div>
+
+                <div class="event">
+                    <div class="time-badge">18:10</div>
+                    <div class="event-title">抵達關西機場 (KIX)</div>
+                    <div class="event-desc">Check-in UO689 (20:15 起飛)。</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <a href="https://maps.app.goo.gl/Gs2KEKMeURAubZuz5" class="fab" target="_blank">📍</a>
+
+</div>
+
+<script>
+    const ENCRYPTED_PASS = "MDMxN3NhbHQ=";
+
+    function checkPassword() {
+        const input = document.getElementById("password-input").value;
+        const errorMsg = document.getElementById("error-msg");
+
+        // Simple verification
+        if (btoa(input + "salt") === ENCRYPTED_PASS) {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("main-app").style.display = "block";
+            // Save login state to prevent re-login on refresh (optional)
+            sessionStorage.setItem("alison_trip_logged_in", "true");
+        } else {
+            errorMsg.style.display = "block";
+            document.getElementById("password-input").value = "";
+        }
+    }
+
+    function handleEnter(e) {
+        if (e.key === "Enter") {
+            checkPassword();
+        }
+    }
+
+    // Check if already logged in this session
+    if (sessionStorage.getItem("alison_trip_logged_in") === "true") {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("main-app").style.display = "block";
+    }
+
+    // Tab Switching Logic
+    function openTab(tabName, btnElement) {
+        var i, tabContent, tabBtn;
+
+        tabContent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabContent.length; i++) {
+            tabContent[i].style.display = "none";
+            tabContent[i].classList.remove("active");
+        }
+
+        tabBtn = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tabBtn.length; i++) {
+            tabBtn[i].classList.remove("active");
+        }
+
+        document.getElementById(tabName).style.display = "block";
+        setTimeout(() => document.getElementById(tabName).classList.add("active"), 10);
+
+        btnElement.classList.add("active");
+
+        btnElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    // Checklist Logic
+    const inputs = document.querySelectorAll('input[type="checkbox"]');
+    inputs.forEach((input, index) => {
+        const key = 'alison_bday_v4_login_' + index;
+        const saved = localStorage.getItem(key);
+        if (saved === 'true') input.checked = true;
+
+        input.addEventListener('change', () => {
+            localStorage.setItem(key, input.checked);
+        });
+    });
+</script>
+
+</body>
+</html>
